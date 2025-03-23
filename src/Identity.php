@@ -250,7 +250,7 @@ class Identity
      * @throws GuzzleException
      * @throws InvalidArgumentException
      */
-    public function checkMobileMatchToNationalCode(string $nationalCode, string $mobileNumber): array
+    public function verifyMobileNationalCodeMatch(string $nationalCode, string $mobileNumber): array
     {
         return $this->request('GET', '/v1/services/matching', [
             'nationalCode' => $nationalCode,
