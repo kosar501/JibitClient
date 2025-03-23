@@ -13,7 +13,6 @@ class Identity
     private Client $client;
     private string $apiKey;
     private string $apiSecret;
-
     private string $accessToken = 'accessToken';
     private string $refreshToken = 'refreshToken';
     private string $apiUrl = 'https://napi.jibit.ir/ide';
@@ -24,8 +23,9 @@ class Identity
     /**
      * @param string $apiKey
      * @param string $apiSecret
-     * @param CacheInterface $cache
+     * @param CacheInterface|null $cache
      * @throws GuzzleException
+     * @throws InvalidArgumentException
      */
     public function __construct(string $apiKey, string $apiSecret, CacheInterface $cache = null)
     {
@@ -38,6 +38,227 @@ class Identity
         // Initialize tokens
         $this->initializeTokens();
     }
+
+    /**
+     * Retrieves card information based on the provided card number.
+     *
+     * The response includes the following fields:
+     * - number: string - شماره کارت ارسالی توسط شما.
+     * - cardinfo: CardInfo - اطلاعات مربوط به کارت.
+     *   - bank: string - شناسه بانک مربوط به شماره حساب (رجوع شود به جدول اطلاعات بانک‌ها).
+     *   - type: string - نوع کارت، یکی از مقادیر زیر:
+     *     - DEBIT (نقدی)
+     *     - CREDIT (اعتباری)
+     *     - CREDIT (اعتباری، ویژه)
+     *     - GIFT_CARD (کارت هدیه)
+     *     - VIRTUAL_CARD (پیش پرداخت آنلاین)
+     *     - CARD (کارت مجازی)
+     *     - E_MONEY (INSTALLMENT_CARD (نامشخص))
+     *   - ownerName: string - نام دارنده کارت.
+     *   - depositNumber: string - شماره حساب پشت کارت.
+     *
+     * @param string $cardNumber The card number to retrieve information for.
+     * @return array Returns an associative array with the following structure:
+     *               [
+     *                   'number' => 'string', // شماره کارت ارسالی توسط شما
+     *                   'cardinfo' => [
+     *                       'bank' => 'string', // شناسه بانک
+     *                       'type' => 'string', // نوع کارت
+     *                       'ownerName' => 'string', // نام دارنده کارت
+     *                       'depositNumber' => 'string', // شماره حساب پشت کارت
+     *                   ],
+     *               ]
+     * @throws GuzzleException If there is an error during the HTTP request.
+     * @throws InvalidArgumentException If the cache key is invalid.
+     */
+    public function getCardInfo(string $cardNumber): array
+    {
+        return $this->request('GET', '/v1/cards', [
+            'number' => $cardNumber
+        ]);
+    }
+
+    /**
+     * Retrieves IBAN information based on the provided IBAN.
+     *
+     * The response includes the following fields:
+     * - value: string - شماره شبا ارسالی توسط شما.
+     * - ibanInfo: IbanInfo - اطلاعات مربوط به شبا.
+     *   - bank: string - شناسه بانک مربوط به شماره حساب (رجوع شود به جدول اطلاعات بانک‌ها).
+     *   - depositNumber: string - شماره حساب.
+     *   - iban: string - شبا به دست آمده از شماره حساب.
+     *   - status: string - وضعیت حساب، یکی از مقادیر زیر:
+     *     - ACTIVE (فعال)
+     *     - DEPOSIT_BLOCK_WITH (حساب بانک شده است اما قابلیت واریز دارد)
+     *     - BLOCK_WITHOUT_DEPOSIT (حساب بانک شده است و قابلیت واریز ندارد)
+     *     - IDLE (راکد)
+     *     - UNKNOWN (نامشخص)
+     *   - owners: Owner[] - آرایه‌ای از صاحبان شبا.
+     *     - firstName: string - نام صاحب حساب.
+     *     - lastName: string - نام خانوادگی صاحب حساب.
+     *
+     * @param string $iban The IBAN to retrieve information for.
+     * @return array Returns an associative array with the following structure:
+     *               [
+     *                   'value' => 'string', // شماره شبا ارسالی توسط شما
+     *                   'ibanInfo' => [
+     *                       'bank' => 'string', // شناسه بانک
+     *                       'depositNumber' => 'string', // شماره حساب
+     *                       'iban' => 'string', // شبا
+     *                       'status' => 'string', // وضعیت حساب
+     *                       'owners' => [
+     *                           [
+     *                               'firstName' => 'string', // نام صاحب حساب
+     *                               'lastName' => 'string', // نام خانوادگی صاحب حساب
+     *                           ],
+     *                           // Additional owners...
+     *                       ],
+     *                   ],
+     *               ]
+     * @throws GuzzleException If there is an error during the HTTP request.
+     * @throws InvalidArgumentException If the cache key is invalid.
+     */
+    public function getIbanInfo(string $iban): array
+    {
+        return $this->request('GET', '/v1/ibans', [
+            'value' => $iban
+        ]);
+    }
+
+    /**
+     * Converts a card number to its corresponding account number and retrieves related information.
+     *
+     * The response includes the following fields:
+     * - number: string - شماره کارت ارسالی توسط شما.
+     * - type: string - نوع کارت، یکی از مقادیر زیر:
+     *   - DEBIT (نقدی)
+     *   - CREDIT (اعتباری)
+     *   - CREDIT (اعتباری، ویژه)
+     *   - GIFT_CARD (کارت هدیه)
+     *   - VIRTUAL_CARD (پیش پرداخت آنلاین)
+     *   - ONLINE_PREPAID (کارت مجازی)
+     *   - INSTALLMENT_CARD (E_MONEY (نامشخص))
+     * - depositInfo: DepositInfo - اطلاعات مربوط به حساب.
+     *   - bank: string - شناسه بانک مربوط به شماره حساب (رجوع شود به جدول اطلاعات بانک‌ها).
+     *   - depositNumber: string - شماره حساب پشت کارت.
+     *
+     * @param string $cardNumber The card number to convert and retrieve information for.
+     * @return array Returns an associative array with the following structure:
+     *               [
+     *                   'number' => 'string', // شماره کارت ارسالی توسط شما
+     *                   'type' => 'string', // نوع کارت
+     * @throws GuzzleException If there is an error during the HTTP request.
+     * @throws InvalidArgumentException If the cache key is invalid.
+     */
+    public function cardNumberToAccountNumber(string $cardNumber): array
+    {
+        return $this->request('GET', '/v1/cards', [
+            'number' => $cardNumber,
+            'deposit' => true
+        ]);
+    }
+
+    /**
+     * Converts a card number to its corresponding iban number and retrieves related information.
+     *
+     * The response includes the following fields:
+     * - number: string - شماره کارت ارسالی توسط شما.
+     * - type: string - نوع کارت، یکی از مقادیر زیر:
+     *   - DEBIT (نقدی)
+     *   - UNKNOWN (نامشخص)
+     * - ibanInfo: IbanInfo - اطلاعات مربوط به شبا.
+     * - bank: string - شناسه بانک مربوط به شماره حساب (رجوع شود به جدول اطلاعات بانک‌ها).
+     * - depositNumber: string - شماره حساب.
+     * - iban: string - شبا به دست آمده از شماره حساب.
+     * - status: string - وضعیت حساب، یکی از مقادیر زیر:
+     * - ACTIVE (فعال)
+     * - DEPOSIT_BLOCK_WITH (حساب بانک شده است اما قابلیت واریز دارد)
+     * - BLOCK_WITHOUT_DEPOSIT (حساب بانک شده است و قابلیت واریز ندارد)
+     * - IDLE (راکد)
+     * - UNKNOWN (نامشخص)
+     * - owners: Owner[] - آرایه‌ای از صاحبان شبا.
+     * - firstName: string - نام صاحب حساب.
+     * - lastName: string - نام خانوادگی صاحب حساب.
+     *
+     * @param string $cardNumber The card number to convert and retrieve information for.
+     * @return array Returns an associative array with the following structure:
+     *               [
+     *                   'number' => 'string', // شماره کارت ارسالی توسط شما
+     *                   'type' => 'string', // نوع کارت
+     *                   'ibanInfo' => [
+     *                      'bank' => 'string', // شناسه بانک
+     *                      'depositNumber' => 'string', // شماره حساب
+     *                      'iban' => 'string', // شبا
+     *                      'status' => 'string', // وضعیت حساب
+     *                      'owners' => [
+     *                            [
+     *                               'firstName' => 'string', // نام صاحب حساب
+     *                               'lastName' => 'string', // نام خانوادگی صاحب حساب
+     *                            ],
+     *                         // Additional owners...
+     *                     ],
+     *                  ],
+     *               ]
+     * @throws GuzzleException If there is an error during the HTTP request.
+     * @throws InvalidArgumentException If the cache key is invalid.
+     */
+    public function cardNumberToIban(string $cardNumber): array
+    {
+        return $this->request('GET', '/v1/cards', [
+            'number' => $cardNumber,
+            'iban' => true
+        ]);
+    }
+
+    /**
+     * Checks the availability of the card-to-IBAN conversion service.
+     *
+     * The response includes the following fields:
+     * - availabilityReport: AvailabilityReport - گزارش در دسترس بودن سرویس کارت به شبا.
+     *   - bankIdentifier: string - وضعیت دسترس‌پذیری سرویس، یکی از مقادیر زیر:
+     *     - AVAILABLE (در دسترس بودن)
+     *     - NOT_AVAILABLE (در دسترس نبودن)
+     *
+     * @return array Returns an associative array with the following structure:
+     *               [
+     *                   'availabilityReport' => [
+     *                       'bankIdentifier' => 'string', // وضعیت دسترس‌پذیری سرویس
+     *                   ],
+     *               ]
+     * @throws GuzzleException If there is an error during the HTTP request.
+     * @throws InvalidArgumentException If the cache key is invalid.
+     */
+    public function checkCardNumberToIBANService(): array
+    {
+        return $this->request('GET', '/v1/services/availability', [
+            'cardToIBAN' => true
+        ]);
+    }
+
+    /**
+     * Check the mobile phone's compatibility with the national code.
+     *
+     * The response includes the following fields:
+     * - matched: boolean - تطابق یا عدم تطابق کد ملی و شماره موبایل.
+     *
+     * @param string $nationalCode
+     * @param string $mobileNumber
+     * @return array Returns an associative array with the following structure:
+     *          [
+     *              'matched' => boolean
+     *          ]
+     * @throws GuzzleException
+     * @throws InvalidArgumentException
+     */
+    public function checkMobileMatchToNationalCode(string $nationalCode, string $mobileNumber): array
+    {
+        return $this->request('GET', '/v1/services/matching', [
+            'nationalCode' => $nationalCode,
+            'mobileNumber' => $mobileNumber,
+        ]);
+    }
+
+    /*********************************************** private functions **********************************************/
 
     /**
      * @return void
@@ -93,7 +314,6 @@ class Identity
 
         $this->setTokens($response);
     }
-
 
     /**
      * @param string $method
