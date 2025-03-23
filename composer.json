@@ -1,0 +1,30 @@
+{
+    "name": "kosar501/jibit-client",
+    "type": "library",
+    "description": "A simple package for php integration with jibit services",
+    "license": "MIT",
+    "keywords": [
+        "php",
+        "jibit",
+        "احراز هویت",
+        "استعلام اطلاعات هویتی"
+    ],
+    "autoload": {
+        "psr-4": {
+            "Kosar501\\JibitClient\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=8.2",
+        "guzzlehttp/guzzle": "^7.9",
+        "psr/simple-cache": "^3.0"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "authors": [
+        {
+            "name": "Kosar Ahmadi",
+            "email": "kosar501.75@gmail.com"
+        }
+    ]
+}
