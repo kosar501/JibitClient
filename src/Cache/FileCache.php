@@ -1,6 +1,6 @@
 <?php
 
-namespace Kosar501\Jibit\Cache;
+namespace Kosar501\JibitClient\Cache;
 
 use Psr\SimpleCache\CacheInterface;
 use DateInterval;

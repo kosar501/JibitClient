@@ -1,10 +1,10 @@
 <?php
 
-namespace Kosar501\Jibit;
+namespace Kosar501\JibitClient;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use Kosar501\Jibit\Cache\FileCache;
+use Kosar501\JibitClient\Cache\FileCache;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
