@@ -1,6 +1,6 @@
 <?php
 
-namespace Kosar501\Jibit\Exceptions;
+namespace Kosar501\JibitClient\Exceptions;
 
 class IdentityException
 {

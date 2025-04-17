@@ -1,6 +1,6 @@
 <?php
 
-namespace Kosar501\Jibit;
+namespace Kosar501\JibitClient;
 
 class Payment
 {
