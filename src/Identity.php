@@ -289,7 +289,7 @@ class Identity
     private function fetchTokens(): void
     {
         $response = $this->request('POST', '/v1/tokens/generate', [
-            'apiSecret' => $this->apiSecret,
+            'secretKey' => $this->apiSecret,
             'apiKey' => $this->apiKey,
         ], false);
         $this->setTokens($response);
