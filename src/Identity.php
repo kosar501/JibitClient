@@ -10,12 +10,11 @@ use Psr\SimpleCache\InvalidArgumentException;
 
 class Identity
 {
-    private Client $client;
     private string $apiKey;
     private string $apiSecret;
     private string $accessToken = 'accessToken';
     private string $refreshToken = 'refreshToken';
-    private string $apiUrl = 'https://napi.jibit.ir/ide';
+    private string $apiUrl = 'https://napi.jibit.ir';
 
     private CacheInterface $cache;
     private string $cachePrefix = 'jibit_tokens_';
@@ -344,12 +343,12 @@ class Identity
 
         if ($method == 'POST') {
             //$data is body
-            $response = $client->post($url, [
+            $response = $client->post('/ide/' . $url, [
                 'json' => $data,
             ]);
         } else {
             //$data is query params
-            $response = $client->get($url, [
+            $response = $client->get('/ide/' . $url, [
                 'query' => $data,
             ]);
         }
