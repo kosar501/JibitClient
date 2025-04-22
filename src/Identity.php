@@ -257,6 +257,39 @@ class Identity
         ]);
     }
 
+    /**
+     * Retrieve address information from a postal code using the postal service API.
+     *
+     * This method queries the postal service API to get detailed address information
+     * associated with a given 10-digit postal code.
+     *
+     * The response includes the following fields:
+     * - code: string - The postal code that was queried
+     * - addressInfo: array - An array containing detailed address information:
+     *   - postalCode: string - The postal code
+     *   - address: string - Complete address string
+     *   - province: string - Province name
+     *   - district: string - District name
+     *   - street: string - Street name
+     *   - no: string - Number (پلاک)
+     *   - floor: string - Floor (طبقه)
+     *
+     * @param string $postalCode A 10-digit postal code to query
+     * @return array Returns an associative array with address information
+     * @throws \GuzzleHttp\Exception\GuzzleException If there's an error during the HTTP request
+     * @throws \InvalidArgumentException If the postal code is invalid (not 10 digits)
+     * @throws InvalidArgumentException
+     */
+    public function getAddressFromPostalCode(string $postalCode): array
+    {
+        if (strlen($postalCode) !== 10 || !ctype_digit($postalCode)) {
+            throw new \InvalidArgumentException('Postal code must be a 10-digit number');
+        }
+
+        return $this->request('GET', 'v1/services/postal', [
+            'code' => $postalCode
+        ]);
+    }
     /*********************************************** private functions **********************************************/
 
     /**
