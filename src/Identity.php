@@ -290,6 +290,49 @@ class Identity
             'code' => $postalCode
         ]);
     }
+
+    /**
+     * Verify if a bank card number matches the given national code and birth date.
+     *
+     * This method checks the compatibility between a bank card number, national code,
+     * and birth date to determine if they belong to the same individual.
+     *
+     * @param string $nationalCode 10-digit national code (کدملی)
+     * @param string $birthDate Birth date in Solar (Shamsi) calendar format (YYYY/MM/DD)
+     * @param string $cardNumber Bank card number (شماره کارت)
+     * @return array Returns an associative array with the following structure:
+     *         [
+     *             'matched' => bool // true if card matches national code and birth date
+     *         ]
+     * @throws \GuzzleHttp\Exception\GuzzleException If there's an error during the HTTP request
+     * @throws \InvalidArgumentException If any parameter is invalid
+     */
+    public function verifyCardNumberNationalCodeMatch(
+        string $nationalCode,
+        string $birthDate,
+        string $cardNumber
+    ): array {
+        // Validate national code (10 digits)
+        if (strlen($nationalCode) !== 10 || !ctype_digit($nationalCode)) {
+            throw new \InvalidArgumentException('National code must be a 10-digit number');
+        }
+
+        // Basic birth date format validation (YYYY/MM/DD)
+        if (!preg_match('/^\d{4}\/\d{2}\/\d{2}$/', $birthDate)) {
+            throw new \InvalidArgumentException('Birth date must be in YYYY/MM/DD format');
+        }
+
+        // Basic card number validation (assuming minimum 16 digits)
+        if (strlen($cardNumber) < 16 || !ctype_digit($cardNumber)) {
+            throw new \InvalidArgumentException('Card number must be at least 16 digits');
+        }
+
+        return $this->request('GET', '/v1/services/matching', [
+            'cardNumber' => $cardNumber,
+            'nationalCode' => $nationalCode,
+            'birthDate' => $birthDate
+        ]);
+    }
     /*********************************************** private functions **********************************************/
 
     /**
