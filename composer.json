@@ -17,7 +17,8 @@
     "require": {
         "php": ">=8.2",
         "guzzlehttp/guzzle": "^7.9",
-        "psr/simple-cache": "^3.0"
+        "psr/simple-cache": "^3.0",
+      "ext-ctype": "*"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
