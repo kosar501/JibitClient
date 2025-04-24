@@ -317,11 +317,6 @@ class Identity
             throw new \InvalidArgumentException('National code must be a 10-digit number');
         }
 
-        // Basic birth date format validation (YYYY/MM/DD)
-        if (!preg_match('/^\d{4}\/\d{2}\/\d{2}$/', $birthDate)) {
-            throw new \InvalidArgumentException('Birth date must be in YYYY/MM/DD format');
-        }
-
         // Basic card number validation (assuming minimum 16 digits)
         if (strlen($cardNumber) < 16 || !ctype_digit($cardNumber)) {
             throw new \InvalidArgumentException('Card number must be at least 16 digits');
