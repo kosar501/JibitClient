@@ -1,5 +1,9 @@
 <?php
 
+//TODO
+//Client error: `GET https://napi.jibit.ir/ide//v1/services/matching?cardNumber=6104338988152555&nationalCode=1742222838&birthDate=%DB%B1%DB%B3%DB%B7%DB%B5%2F%DB%B0%DB%B4%2F%DB%B2%DB%B7` resulted in a `400 Bad Request` response: {"code":"birthDate.not_valid","message":"تاریخ تولد نامعتبر است"}
+//handle jibit errors
+
 namespace Kosar501\JibitClient;
 
 use GuzzleHttp\Client;
@@ -153,7 +157,7 @@ class Identity
     {
         return $this->request('GET', '/v1/cards', [
             'number' => $cardNumber,
-            'deposit' => true
+            'deposit' => 'true'
         ]);
     }
 
@@ -205,7 +209,7 @@ class Identity
     {
         return $this->request('GET', '/v1/cards', [
             'number' => $cardNumber,
-            'iban' => true
+            'iban' => 'true'
         ]);
     }
 
@@ -230,7 +234,7 @@ class Identity
     public function checkCardNumberToIBANService(): array
     {
         return $this->request('GET', '/v1/services/availability', [
-            'cardToIBAN' => true
+            'cardToIBAN' => 'true'
         ]);
     }
 
@@ -311,7 +315,8 @@ class Identity
         string $nationalCode,
         string $birthDate,
         string $cardNumber
-    ): array {
+    ): array
+    {
         // Validate national code (10 digits)
         if (strlen($nationalCode) !== 10 || !ctype_digit($nationalCode)) {
             throw new \InvalidArgumentException('National code must be a 10-digit number');
